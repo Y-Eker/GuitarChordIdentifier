@@ -1,5 +1,6 @@
 import mediapipe as mp
 import cv2
+import numpy as np
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
 
@@ -35,6 +36,21 @@ def main():
                 mp_drawing.draw_landmarks(img, hand_landmark, connections=custom_connections,
                                           landmark_drawing_spec=custom_style)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        canny_img = cv2.Canny(grayscale_img, 125, 175)
+        lines = cv2.HoughLines(canny_img, 1, np.pi / 180, 150)
+        for line in lines:
+            rho, theta = line[0]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * -b)
+            y1 = int(y0 + 1000 * a)
+            x2 = int(x0 - 1000 * -b)
+            y2 = int(y0 - 1000 * a)
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
         cv2.imshow("Electric Guitar Teacher", img)
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
