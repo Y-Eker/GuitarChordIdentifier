@@ -7,8 +7,7 @@ def main():
     webcam = cv2.VideoCapture(0)
     mp_hands = mp.solutions.hands.Hands()
     mp_drawing = mp.solutions.drawing_utils
-    included_landmarks = [mp.solutions.hands.HandLandmark.THUMB_TIP,
-                          mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
+    included_landmarks = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
                           mp.solutions.hands.HandLandmark.MIDDLE_FINGER_TIP,
                           mp.solutions.hands.HandLandmark.RING_FINGER_TIP,
                           mp.solutions.hands.HandLandmark.PINKY_TIP]
