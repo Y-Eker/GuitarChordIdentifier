@@ -17,7 +17,6 @@ def main():
     for landmark in mp.solutions.hands.HandLandmark:
         if landmark not in included_landmarks:
             excluded_landmarks.append(landmark)
-    print(excluded_landmarks)
     custom_style = mp.solutions.drawing_styles.get_default_hand_landmarks_style()
     custom_connections = list(mp.solutions.hands.HAND_CONNECTIONS)
     for landmark in excluded_landmarks:
@@ -44,6 +43,8 @@ def main():
         if lines is not None:
             for line in lines:
                 for x1, y1, x2, y2 in line:
+                    """if abs(y2 - y1 / x2 - x1) > 75:
+                        continue"""
                     cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
         cv2.imshow("Electric Guitar Teacher", img)
