@@ -37,20 +37,15 @@ def main():
                                           landmark_drawing_spec=custom_style)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        canny_img = cv2.Canny(grayscale_img, 125, 175)
-        lines = cv2.HoughLines(canny_img, 1, np.pi / 180, 150)
-        for line in lines:
-            rho, theta = line[0]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            x1 = int(x0 + 1000 * -b)
-            y1 = int(y0 + 1000 * a)
-            x2 = int(x0 - 1000 * -b)
-            y2 = int(y0 - 1000 * a)
-            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
+        thresh = cv2.threshold(grayscale_img, 100, 255, cv2.THRESH_BINARY)[1]
+        canny_img = cv2.Canny(thresh, 100, 200)
+        lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 115, np.array([]), 5, 200)
+        line_image = np.copy(img) * 0
+        if lines is not None:
+            for line in lines:
+                for x1, y1, x2, y2 in line:
+                    cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
         cv2.imshow("Electric Guitar Teacher", img)
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
