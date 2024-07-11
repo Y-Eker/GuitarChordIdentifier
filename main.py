@@ -41,8 +41,11 @@ def main():
                                           landmark_drawing_spec=custom_style)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(grayscale_img, 100, 255, cv2.THRESH_BINARY)[1]
-        canny_img = cv2.Canny(thresh, 100, 200)
+        thresh = cv2.adaptiveThreshold(grayscale_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 10)
+        kernel = np.ones((3, 3), np.uint8)
+        img_erosion = cv2.erode(thresh, kernel, iterations=1)
+        img_dilation = cv2.dilate(img_erosion, kernel, iterations=1)
+        canny_img = cv2.Canny(img_dilation, 100, 200)
         lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 150, np.array([]), 5, 200)
         line_image = np.copy(img) * 0
         strong_lines = []
@@ -50,7 +53,6 @@ def main():
             strong_lines.append(lines[0])
             for line in lines:
                 if functions.similar_strong_line(line, strong_lines, slope_diff_threshold, point_diff_threshold):
-                    print("True")
                     continue
                 strong_lines.append(line)
             for line in strong_lines:
