@@ -1,4 +1,5 @@
 import mediapipe as mp
+import functions
 import cv2
 import numpy as np
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
@@ -26,8 +27,12 @@ def main():
         custom_connections = [connection_tuple for connection_tuple in custom_connections
                               if landmark.value not in connection_tuple]
 
+    slope_diff_threshold = 100
+    point_diff_threshold = 500
+
     while webcam.isOpened():
-        success, img = webcam.read()
+        # success, img = webcam.read()
+        img = cv2.imread("pictures/chordAm.png", cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         result = mp_hands.process(img)
         if result.multi_hand_landmarks:
@@ -38,16 +43,22 @@ def main():
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(grayscale_img, 100, 255, cv2.THRESH_BINARY)[1]
         canny_img = cv2.Canny(thresh, 100, 200)
-        lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 115, np.array([]), 5, 200)
+        lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 150, np.array([]), 5, 200)
         line_image = np.copy(img) * 0
+        strong_lines = []
         if lines is not None:
+            strong_lines.append(lines[0])
             for line in lines:
-                for x1, y1, x2, y2 in line:
-                    """if abs(y2 - y1 / x2 - x1) > 75:
-                        continue"""
-                    cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                if functions.similar_strong_line(line, strong_lines, slope_diff_threshold, point_diff_threshold):
+                    print("True")
+                    continue
+                strong_lines.append(line)
+            for line in strong_lines:
+                x1, y1, x2, y2 = line[0][0], line[0][1], line[0][2], line[0][3]
+                # noinspection PyTypeChecker
+                cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
-        cv2.imshow("Electric Guitar Teacher", img)
+        cv2.imshow("Electric Guitar Teacher", cv2.resize(img, (1600, 900)))
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
     webcam.release()
