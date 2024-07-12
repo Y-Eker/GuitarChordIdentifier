@@ -1,5 +1,6 @@
 import mediapipe as mp
 import cv2
+import functions
 import numpy as np
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
@@ -13,6 +14,9 @@ def main():
                           mp.solutions.hands.HandLandmark.RING_FINGER_TIP,
                           mp.solutions.hands.HandLandmark.PINKY_TIP]
     excluded_landmarks = []
+
+    slope_diff_threshold = 2
+    point_diff_threshold = 20
 
     for landmark in mp.solutions.hands.HandLandmark:
         if landmark not in included_landmarks:
@@ -40,12 +44,17 @@ def main():
         canny_img = cv2.Canny(thresh, 100, 200)
         lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 115, np.array([]), 5, 200)
         line_image = np.copy(img) * 0
+        strong_lines = []
         if lines is not None:
+            strong_lines.append(lines[0])
             for line in lines:
-                for x1, y1, x2, y2 in line:
-                    """if abs(y2 - y1 / x2 - x1) > 75:
-                        continue"""
-                    cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                if functions.similar_strong_line(line, strong_lines, slope_diff_threshold, point_diff_threshold):
+                    continue
+                strong_lines.append(line)
+            for line in strong_lines:
+                x1, y1, x2, y2 = line[0][0], line[0][1], line[0][2], line[0][3]
+                # noinspection PyTypeChecker
+                cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
         cv2.imshow("Electric Guitar Teacher", img)
         if cv2.waitKey(5) & 0xFF == ord("q"):
