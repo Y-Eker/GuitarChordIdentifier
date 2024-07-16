@@ -6,7 +6,7 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
 
 def main():
-    webcam = cv2.VideoCapture("videos/GuitarVid.mp4")
+    webcam = cv2.VideoCapture("videos/GuitarVid2.mp4")
     mp_hands = mp.solutions.hands.Hands()
     mp_drawing = mp.solutions.drawing_utils
     included_landmarks = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
@@ -46,11 +46,10 @@ def main():
         line_image = np.copy(img) * 0
         strong_lines = []
         if lines is not None:
-            strong_lines.append(lines[0])
             for line in lines:
                 if functions.similar_strong_line(line, strong_lines, slope_diff_threshold, point_diff_threshold):
                     continue
-                if functions.calculate_slope(line) > 10:
+                if functions.calculate_slope(line) > 4:
                     continue
                 strong_lines.append(line)
             for line in strong_lines:
@@ -58,7 +57,7 @@ def main():
                 # noinspection PyTypeChecker
                 cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
-        cv2.imshow("Electric Guitar Teacher", canny_img)
+        cv2.imshow("Electric Guitar Teacher", img)
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
     webcam.release()

@@ -3,7 +3,7 @@ import math
 
 def calculate_slope(line):
     x1, y1, x2, y2 = line[0][0], line[0][1], line[0][2], line[0][3]
-    return math.inf if x2 - x1 == 0 else abs(y2 - y1 / x2 - x1)
+    return math.inf if x2 - x1 == 0 else abs((y2 - y1) / (x2 - x1))
 
 
 def dist_two_points(x1, y1, x2, y2):
