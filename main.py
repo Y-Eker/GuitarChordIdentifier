@@ -42,7 +42,7 @@ def main():
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # thresh = cv2.threshold(grayscale_img, 170, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.adaptiveThreshold(grayscale_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,
-                                       15,50)
+                                       15,10)
         canny_img = cv2.Canny(thresh, 100, 200)
         lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 150, np.array([]), 20, 75)
         line_image = np.copy(img) * 0
@@ -59,7 +59,7 @@ def main():
                 # noinspection PyTypeChecker
                 cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         img = cv2.addWeighted(img, 0.8, line_image, 1, 0)
-        cv2.imshow("Electric Guitar Teacher", img)
+        cv2.imshow("Electric Guitar Teacher", canny_img)
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
     webcam.release()
