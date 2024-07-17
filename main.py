@@ -42,8 +42,14 @@ def main():
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # thresh = cv2.threshold(grayscale_img, 170, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.adaptiveThreshold(grayscale_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,
-                                       15,10)
+                                       9,15)
+        """kernel = np.ones((3, 3), np.uint8)
+        thresh = cv2.dilate(thresh, kernel, iterations=1)
+        thresh = cv2.erode(thresh, kernel, iterations=1)"""
         canny_img = cv2.Canny(thresh, 100, 200)
+        kernel = np.ones((3, 3), np.uint8)
+        canny_img = cv2.dilate(canny_img, kernel, iterations=1)
+        canny_img = cv2.erode(canny_img, kernel, iterations=1)
         lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 150, np.array([]), 20, 75)
         line_image = np.copy(img) * 0
         strong_lines = []
