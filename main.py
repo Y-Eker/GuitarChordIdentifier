@@ -6,7 +6,7 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
 
 def main():
-    webcam = cv2.VideoCapture("videos/GuitarVid2.mp4")
+    webcam = cv2.VideoCapture("videos/GuitarVid4.mp4")
     mp_hands = mp.solutions.hands.Hands()
     mp_drawing = mp.solutions.drawing_utils
     included_landmarks = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
@@ -15,8 +15,8 @@ def main():
                           mp.solutions.hands.HandLandmark.PINKY_TIP]
     excluded_landmarks = []
 
-    slope_diff_threshold = 2
-    point_diff_threshold = 20
+    slope_diff_threshold = 0.5
+    point_diff_threshold = 30
 
     for landmark in mp.solutions.hands.HandLandmark:
         if landmark not in included_landmarks:
@@ -40,7 +40,9 @@ def main():
                                           landmark_drawing_spec=custom_style)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(grayscale_img, 150, 255, cv2.THRESH_BINARY)[1]
+        # thresh = cv2.threshold(grayscale_img, 170, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.adaptiveThreshold(grayscale_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,
+                                       15,50)
         canny_img = cv2.Canny(thresh, 100, 200)
         lines = cv2.HoughLinesP(canny_img, 1, np.pi / 180, 150, np.array([]), 20, 75)
         line_image = np.copy(img) * 0
