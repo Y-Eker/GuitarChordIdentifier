@@ -52,7 +52,7 @@ model.add(Dense(1, activation = 'sigmoid'))
 model.compile('adam', loss=tf.losses.BinaryCrossentropy(), metrics=['accuracy'])
 model.summary()
 logdir='logs'
-tensorboard_callback = tf.keras.callback.Tnesorboard(log_dir=logdir)
+tensorboard_callback = tf.keras.callback.Tensorboard(log_dir=logdir)
 hist = model.fit(train, epochs=20, validation_data=val, callbacks=[tensorboard_callback])
 fig = plt.figure()
 plt.plot(hist.history['loss'], color='teal', label='loss')
