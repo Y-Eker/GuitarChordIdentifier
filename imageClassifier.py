@@ -1,12 +1,9 @@
 import tensorflow as tf
-import os
-import cv2
-import imghdr
 import numpy as np
+from keras import Sequential
+from keras.src.metrics import Precision, Recall, BinaryAccuracy
 from matplotlib import pyplot as plt
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
-from tensorflow.keras.metrics import Precision, Recall, BinaryAccuracy
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 import cv2
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -51,7 +48,6 @@ plt.plot(hist.history['val_loss'], color='orange', label='val_loss')
 fig.suptitle('Loss', fontsize=20)
 plt.legend(loc="upper left")
 plt.show()
-from tensorflow.keras.metrics import Precision, Recall, BinaryAccuracy
 pre = Precision()
 re = Recall()
 acc = BinaryAccuracy()
