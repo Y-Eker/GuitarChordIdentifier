@@ -10,9 +10,8 @@ gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus: 
     tf.config.experimental.set_memory_growth(gpu, True)
     tf.config.list_physical_devices('GPU')
-data_dir = 'data' 
 image_exts = ['jpeg','jpg', 'bmp', 'png']
-data = tf.keras.utils.image_dataset_from_directory('data')
+data = tf.keras.utils.image_dataset_from_directory("data")
 data_iterator = data.as_numpy_iterator()
 batch = data_iterator.next()
 fig, ax = plt.subplots(ncols=4, figsize=(20,20))
