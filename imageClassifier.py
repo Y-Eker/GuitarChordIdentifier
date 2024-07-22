@@ -1,3 +1,4 @@
+import keras
 import tensorflow as tf
 import numpy as np
 from keras import Sequential
@@ -5,42 +6,47 @@ from keras.src.metrics import Precision, Recall, BinaryAccuracy
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 import cv2
+from tensorflow.python.keras import layers
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
+"""gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus: 
     tf.config.experimental.set_memory_growth(gpu, True)
-    tf.config.list_physical_devices('GPU')
+    tf.config.list_physical_devices('GPU')"""
 image_exts = ['jpeg','jpg', 'bmp', 'png']
-data = tf.keras.utils.image_dataset_from_directory("data")
-data_iterator = data.as_numpy_iterator()
+dataset = tf.keras.utils.image_dataset_from_directory("data", labels="inferred")
+data_iterator = dataset.as_numpy_iterator()
 batch = data_iterator.next()
 fig, ax = plt.subplots(ncols=4, figsize=(20,20))
 for idx, img in enumerate(batch[0][:4]):
     ax[idx].imshow(img.astype(int))
     ax[idx].title.set_text(batch[1][idx])
-data = data.map(lambda x,y: (x/255, y))
-data.as_numpy_iterator().next()
-train_size = int(len(data)*.7)
-val_size = int(len(data)*.2)
-test_size = int(len(data)*.1)
-train = data.take(train_size)
-val = data.skip(train_size).take(val_size)
-test = data.skip(train_size+val_size).take(test_size)
-model = Sequential()
-model.add(Conv2D(16, (3,3), 1, activation='relu', input_shape=(256,256,3)))
-model.add(MaxPooling2D())
-model.add(Conv2D(32, (3,3), 1, activation='relu'))
-model.add(MaxPooling2D())
-model.add(Conv2D(16, (3,3), 1, activation='relu'))
+dataset = dataset.map(lambda x, y: (x / 255, y))
+dataset.as_numpy_iterator().next()
+data_size = len(np.concatenate([i for x, i in dataset], axis=0))
+train_size = int(data_size*.5)
+val_size = int(data_size*.25)
+test_size = data_size - train_size - val_size
+print(data_size, train_size, val_size, test_size)
+train = dataset.take(train_size)
+val = dataset.skip(train_size).take(val_size)
+test = dataset.skip(train_size+val_size)
+# TODO: Low learning rate high epochs
+model = Sequential([
+    Conv2D(16, (3, 3), 1, activation='relu', input_shape=(256, 256, 3)),
+    MaxPooling2D(),
+    Conv2D(32, (3, 3), 1, activation='relu'),
+    MaxPooling2D(),
+])
+model.add(Conv2D(16, (3, 3), 1, activation='relu'))
 model.add(MaxPooling2D())
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))
 model.add(Dense(1, activation='sigmoid'))
-model.compile('adam', loss=tf.losses.BinaryCrossentropy(), metrics=['accuracy'])
+model.compile(keras.optimizers.Adam(learning_rate=1e-4), loss=tf.losses.BinaryCrossentropy(), metrics=['accuracy'])
 model.summary()
 logdir='logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
-hist = model.fit(train, epochs=20, validation_data=val, callbacks=[tensorboard_callback])
+hist = model.fit(train, epochs=20, validation_data=train, callbacks=[tensorboard_callback])
 fig = plt.figure()
 plt.plot(hist.history['loss'], color='teal', label='loss')
 plt.plot(hist.history['val_loss'], color='orange', label='val_loss')
@@ -52,6 +58,7 @@ re = Recall()
 acc = BinaryAccuracy()
 for batch in test.as_numpy_iterator(): 
     X, y = batch
+    print(X, y)
     yhat = model.predict(X)
     pre.update_state(y, yhat)
     re.update_state(y, yhat)
