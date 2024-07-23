@@ -3,8 +3,8 @@ import tensorflow as tf
 import numpy as np
 from keras import Sequential
 from keras.src.metrics import Precision, Recall, BinaryAccuracy
-from matplotlib import pyplot as plt
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+# from matplotlib import pyplot as plt
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, RandomFlip, RandomContrast, RandomBrightness
 import cv2
 
 """gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -21,15 +21,19 @@ for idx, img in enumerate(batch[0][:4]):
     ax[idx].title.set_text(batch[1][idx])"""
 dataset = dataset.map(lambda x, y: (x / 255, y))
 dataset.as_numpy_iterator().next()
-data_size = len(np.concatenate([i for x, i in dataset], axis=0))
+"""data_size = len(np.concatenate([i for x, i in dataset], axis=0))
 train_size = int(data_size*.5)
 val_size = int(data_size*.25)
 test_size = data_size - train_size - val_size
 print(data_size, train_size, val_size, test_size)
 train = dataset.take(train_size)
 val = dataset.skip(train_size).take(val_size)
-test = dataset.skip(train_size+val_size)
+test = dataset.skip(train_size+val_size)"""
 model = Sequential([
+    # Preprocessing
+    RandomFlip('horizontal'),  # Flip left-to-right
+    RandomContrast(0.5),  # Contrast change by up to 50%
+    RandomBrightness(0.25),  # Change brightness up to +-25%
     Conv2D(16, (3, 3), 1, activation='relu', input_shape=(256, 256, 3)),
     MaxPooling2D(),
     Conv2D(32, (3, 3), 1, activation='relu'),
@@ -44,14 +48,15 @@ model.compile(keras.optimizers.Adam(learning_rate=1e-4), loss=tf.losses.BinaryCr
 model.summary()
 logdir='logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
-hist = model.fit(train, epochs=20, validation_data=train, callbacks=[tensorboard_callback])
+hist = model.fit(dataset, epochs=1000, callbacks=[tensorboard_callback])
+model.save("chord_classifier_model.keras")
 """fig = plt.figure()
 plt.plot(hist.history['loss'], color='teal', label='loss')
 plt.plot(hist.history['val_loss'], color='orange', label='val_loss')
 fig.suptitle('Loss', fontsize=20)
 plt.legend(loc="upper left")
 plt.show()"""
-pre = Precision()
+"""pre = Precision()
 re = Recall()
 acc = BinaryAccuracy()
 for batch in test.as_numpy_iterator(): 
@@ -59,15 +64,15 @@ for batch in test.as_numpy_iterator():
     yhat = model.predict(X)
     pre.update_state(y, yhat)
     re.update_state(y, yhat)
-    acc.update_state(y, yhat)
-img = cv2.imread('chordtwo.png')
+    acc.update_state(y, yhat)"""
+img = cv2.imread('chordtwo.jpg')
 """plt.imshow(img)
 plt.show()
 plt.imshow(resize.numpy().astype(int))
 plt.show()"""
 resize = tf.image.resize(img, (256,256))
 yhat = model.predict(np.expand_dims(resize/255, 0))
-if yhat > 0.5: 
+if yhat > 0.5:
     print(f'Am')
 else:
     print(f'C')
