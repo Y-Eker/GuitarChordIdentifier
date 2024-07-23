@@ -40,7 +40,6 @@ def main():
                                           landmark_drawing_spec=custom_style)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         grayscale_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # thresh = cv2.threshold(grayscale_img, 170, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.adaptiveThreshold(grayscale_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,
                                        9,15)
         canny_img = cv2.Canny(thresh, 100, 200)
