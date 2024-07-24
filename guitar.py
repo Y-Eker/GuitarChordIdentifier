@@ -13,7 +13,7 @@ for gpu in gpus:
 
 model = keras.models.load_model("chord_classifier_model.keras")
 
-webcam = cv2.VideoCapture("videos/GuitarVid4.mp4")
+webcam = cv2.VideoCapture("videos/GuitarVid5.mp4")
 mp_hands = mp.solutions.hands.Hands()
 mp_drawing = mp.solutions.drawing_utils
 included_landmarks = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
@@ -21,9 +21,6 @@ included_landmarks = [mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
                       mp.solutions.hands.HandLandmark.RING_FINGER_TIP,
                       mp.solutions.hands.HandLandmark.PINKY_TIP]
 excluded_landmarks = []
-
-slope_diff_threshold = 0.5
-point_diff_threshold = 30
 
 for landmark in mp.solutions.hands.HandLandmark:
     if landmark not in included_landmarks:
@@ -53,7 +50,7 @@ while webcam.isOpened():
     kernel = np.ones((3, 3), np.uint8)
     canny_img = cv2.dilate(canny_img, kernel, iterations=1)
     canny_img = cv2.erode(canny_img, kernel, iterations=1)
-    cv2.imshow("Electric Guitar Teacher", canny_img)
+    cv2.imshow("Electric Guitar Teacher", img)
     canny_rgb = cv2.cvtColor(canny_img, cv2.COLOR_GRAY2RGB)
     resize = tf.image.resize(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (256, 256))
     yhat = model.predict(np.expand_dims(resize / 255, 0))
