@@ -6,10 +6,10 @@ import keras
 import tensorflow as tf
 
 
-"""gpus = tf.config.experimental.list_physical_devices('GPU')
+gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus: 
     tf.config.experimental.set_memory_growth(gpu, True)
-    tf.config.list_physical_devices('GPU')"""
+    tf.config.list_physical_devices('GPU')
 
 model = keras.models.load_model("chord_classifier_model.keras")
 
@@ -50,14 +50,17 @@ while webcam.isOpened():
     kernel = np.ones((3, 3), np.uint8)
     canny_img = cv2.dilate(canny_img, kernel, iterations=1)
     canny_img = cv2.erode(canny_img, kernel, iterations=1)
-    cv2.imshow("Electric Guitar Teacher", img)
     canny_rgb = cv2.cvtColor(canny_img, cv2.COLOR_GRAY2RGB)
     resize = tf.image.resize(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (256, 256))
     yhat = model.predict(np.expand_dims(resize / 255, 0))
+    print(yhat)
     if yhat > 0.5:
-        print(f'Am')
-    else:
         print(f'C')
+        cv2.putText(img, "Chord: C", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+    else:
+        print(f'Am')
+        cv2.putText(img, "Chord: Am", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+    cv2.imshow("Electric Guitar Teacher", img)
     if cv2.waitKey(5) & 0xFF == ord("q"):
         break
 
